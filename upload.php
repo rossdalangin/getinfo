@@ -56,10 +56,16 @@ if ($_FILES['photo']['size'] > MAX_FILE_SIZE) {
     send_json_response(false, 'File is too large.');
 }
 
-$finfo = new finfo(FILEINFO_MIME_TYPE);
-$mime_type = $finfo->file($_FILES['photo']['tmp_name']);
+// Use getimagesize as a more portable way to check MIME type, avoiding finfo dependency
+$image_info = getimagesize($_FILES['photo']['tmp_name']);
+if ($image_info === false) {
+    // This indicates the file is not a valid image that getimagesize can parse.
+    send_json_response(false, 'Invalid image file.');
+}
+
+$mime_type = $image_info['mime'];
 if (!in_array($mime_type, ALLOWED_MIME_TYPES)) {
-    send_json_response(false, 'Invalid file type.');
+    send_json_response(false, 'Invalid file type. Only JPEG and PNG are allowed.');
 }
 
 // --- Store the Uploaded File ---
