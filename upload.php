@@ -1,13 +1,46 @@
 <?php
 // upload.php
 
+// --- Robust Error Handling ---
+// This will catch any fatal error or unhandled exception and return it as JSON.
+// This is crucial for debugging API endpoints.
+ini_set('display_errors', 1);
+error_reporting(E_ALL);
+
+function handle_shutdown() {
+    $error = error_get_last();
+    if ($error !== null && in_array($error['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR, E_USER_ERROR])) {
+        // If headers have already been sent, we can't send a new JSON header.
+        // But we can still try to output a JSON string.
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
+        }
+        echo json_encode([
+            'success' => false,
+            'message' => 'A fatal error occurred on the server.',
+            'error_details' => [
+                'type'    => $error['type'],
+                'message' => $error['message'],
+                'file'    => $error['file'],
+                'line'    => $error['line'],
+            ]
+        ]);
+        exit;
+    }
+}
+register_shutdown_function('handle_shutdown');
+
 // --- Initialization ---
 require_once 'config.php';
 session_start();
 
 // --- Response Helper ---
 function send_json_response($success, $message, $data = []) {
-    header('Content-Type: application/json');
+    // Ensure no other output is sent
+    if (headers_sent()) {
+        return;
+    }
+    header('Content-Type: application/json; charset=UTF-8');
     echo json_encode([
         'success' => $success,
         'message' => $message,
@@ -49,23 +82,21 @@ if (!$name || !$email || !$country || !$city || !$address) {
 
 // --- File Upload Handling ---
 if (!isset($_FILES['photo']) || $_FILES['photo']['error'] !== UPLOAD_ERR_OK) {
-    send_json_response(false, 'File upload error.');
+    send_json_response(false, 'File upload error: ' . ($_FILES['photo']['error'] ?? 'Unknown error'));
 }
 
 if ($_FILES['photo']['size'] > MAX_FILE_SIZE) {
     send_json_response(false, 'File is too large.');
 }
 
-// Use getimagesize as a more portable way to check MIME type, avoiding finfo dependency
 $image_info = getimagesize($_FILES['photo']['tmp_name']);
 if ($image_info === false) {
-    // This indicates the file is not a valid image that getimagesize can parse.
-    send_json_response(false, 'Invalid image file.');
+    send_json_response(false, 'Invalid image file. Could not get image size.');
 }
 
 $mime_type = $image_info['mime'];
 if (!in_array($mime_type, ALLOWED_MIME_TYPES)) {
-    send_json_response(false, 'Invalid file type. Only JPEG and PNG are allowed.');
+    send_json_response(false, 'Invalid file type. Only JPEG and PNG are allowed. Detected: ' . $mime_type);
 }
 
 // --- Store the Uploaded File ---
@@ -74,7 +105,7 @@ $photo_filename = uniqid('user_') . '.' . $extension;
 $photo_path = UPLOAD_DIR . '/' . $photo_filename;
 
 if (!move_uploaded_file($_FILES['photo']['tmp_name'], $photo_path)) {
-    send_json_response(false, 'Failed to store uploaded file.');
+    send_json_response(false, 'Failed to store uploaded file. Check server permissions.');
 }
 
 // --- Database Interaction ---
@@ -102,7 +133,8 @@ try {
     send_json_response(true, 'Data submitted successfully.');
 
 } catch (PDOException $e) {
-    // In a real application, log this error instead of exposing it.
     send_json_response(false, 'Database error: ' . $e->getMessage());
+} catch (Throwable $t) {
+    send_json_response(false, 'An unexpected server error occurred: ' . $t->getMessage());
 }
 ?>
