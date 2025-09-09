@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Consent & Data Capture Demo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Consent Modal -->
+    <div id="consent-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="language-switcher">
+                <button id="lang-en" class="active">English</button>
+                <button id="lang-tl">Tagalog</button>
+            </div>
+            <div id="consent-en" class="consent-text">
+                <h2>Consent to Capture Your Data</h2>
+                <p>This is a demonstration of how websites can capture your camera image and geolocation data with your permission. Please read the following carefully:</p>
+                <ul>
+                    <li><strong>Purpose:</strong> The data is collected for educational purposes only, to show how modern browsers handle sensitive data capture.</li>
+                    <li><strong>Data Collected:</strong> We will ask for your name, email, and address. We will also capture a single photo from your camera and, with your additional consent, your approximate GPS coordinates. Your IP address will also be recorded.</li>
+                    <li><strong>Storage:</strong> Your data will be stored temporarily in a secure database. The photo will be stored on our server.</li>
+                    <li><strong>Deletion:</strong> All data can be permanently deleted upon request using a secure admin token.</li>
+                    <li><strong>No Hidden Capture:</strong> No data is captured without your explicit action and consent. You are in full control.</li>
+                </ul>
+                <p>By checking the box and clicking "Agree," you consent to the terms outlined above.</p>
+            </div>
+            <div id="consent-tl" class="consent-text" style="display: none;">
+                <h2>Pahintulot sa Pagkuha ng Iyong Datos</h2>
+                <p>Ito ay isang demonstrasyon kung paano kinukuha ng mga website ang iyong larawan mula sa camera at data ng lokasyon nang may pahintulot. Pakibasa nang mabuti:</p>
+                <ul>
+                    <li><strong>Layunin:</strong> Ang data ay kinokolekta para sa layuning pang-edukasyon lamang, upang ipakita kung paano pinangangasiwaan ng mga modernong browser ang pagkuha ng sensitibong data.</li>
+                    <li><strong>Kinokolektang Data:</strong> Hihingin namin ang iyong pangalan, email, at address. Kukuha rin kami ng isang larawan mula sa iyong camera at, kung mayroon kang karagdagang pahintulot, ang iyong tinatayang mga coordinate ng GPS. Ire-record din ang iyong IP address.</li>
+                    <li><strong>Imbakan:</strong> Ang iyong data ay pansamantalang iimbak sa isang secure na database. Ang larawan ay iimbak sa aming server.</li>
+                    <li><strong>Pagbura:</strong> Lahat ng data ay maaaring permanenteng burahin kapag hiniling gamit ang isang secure na admin token.</li>
+                    <li><strong>Walang Nakatagong Pagkuha:</strong> Walang data na kinukuha nang walang iyong malinaw na pagkilos at pahintulot. Ikaw ay may buong kontrol.</li>
+                </ul>
+                <p>Sa pag-check sa kahon at pag-click sa "Sumang-ayon," sumasang-ayon ka sa mga tuntuning nakabalangkas sa itaas.</p>
+            </div>
+            <div class="consent-actions">
+                <label><input type="checkbox" id="consent-checkbox"> I understand and agree</label>
+                <button id="agree-btn" disabled>Agree</button>
+                <button id="decline-btn">Decline</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="container" style="display: none;">
+        <h1>User Consent & Data Capture Demo</h1>
+        <p>Fill out the form below, preview your camera, and click "Capture & Submit".</p>
+
+        <div class="camera-module">
+            <video id="camera-preview" autoplay playsinline></video>
+            <canvas id="snapshot-canvas" style="display:none;"></canvas>
+            <p id="watermark" class="watermark"></p>
+        </div>
+
+        <form id="user-form">
+            <input type="hidden" name="csrf_token" id="csrf-token" value="">
+
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+
+            <label for="country">Country:</label>
+            <input type="text" id="country" name="country" required>
+
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city" required>
+
+            <label for="address">Address:</label>
+            <textarea id="address" name="address" required></textarea>
+
+            <div class="geolocation-option">
+                <label><input type="checkbox" id="geolocate-checkbox"> Include my location (optional)</label>
+                <p id="location-status" class="status"></p>
+            </div>
+
+            <button type="submit" id="submit-btn">Capture & Submit</button>
+        </form>
+        <p id="form-status" class="status"></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
