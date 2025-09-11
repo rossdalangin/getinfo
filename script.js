@@ -193,8 +193,20 @@ document.addEventListener('DOMContentLoaded', () => {
                 method: 'POST',
                 body: formData
             })
-            .then(response => response.json())
+            .then(response => {
+                // If the response is not 'ok' (e.g., status 404, 500), we handle it as an error.
+                if (!response.ok) {
+                    // We get the raw text of the response, which should contain the HTML error.
+                    return response.text().then(text => {
+                        // And we throw it as an error to be caught by the .catch block.
+                        throw new Error(text);
+                    });
+                }
+                // Otherwise, we proceed to parse the JSON. This can still fail if the response is not valid JSON.
+                return response.json();
+            })
             .then(data => {
+                // This block only runs if the response was 'ok' and the JSON was valid.
                 if (data.success) {
                     showFormStatus(data.message, false);
                     form.reset();
@@ -207,8 +219,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             })
             .catch(error => {
-                console.error('Submit Error:', error);
-                showFormStatus('An unexpected error occurred.', true);
+                // This will now catch network errors AND the server's raw HTML error message.
+                console.error('--- Server Response ---');
+                console.error(error.message);
+                console.error('--- End Server Response ---');
+                showFormStatus('An unexpected server error occurred. Check the console for the raw server response.', true);
             });
         };
 

@@ -95,6 +95,7 @@ if (!in_array($mime_type, ALLOWED_MIME_TYPES)) {
 }
 
 // --- Store the Uploaded File ---
+/*
 $extension = pathinfo($_FILES['photo']['name'], PATHINFO_EXTENSION);
 $photo_filename = uniqid('user_') . '.' . $extension;
 $photo_path = UPLOAD_DIR . '/' . $photo_filename;
@@ -102,6 +103,7 @@ $photo_path = UPLOAD_DIR . '/' . $photo_filename;
 if (!move_uploaded_file($_FILES['photo']['tmp_name'], $photo_path)) {
     send_json_response(false, 'Failed to store uploaded file. Check server permissions.');
 }
+*/
 
 // --- Database Interaction ---
 /*
@@ -134,6 +136,6 @@ try {
     send_json_response(false, 'An unexpected server error occurred: ' . $t->getMessage());
 }
 */
-// For now, just return success after file upload
-send_json_response(true, 'File uploaded, database interaction commented out.');
+// For now, just return success after file validation
+send_json_response(true, 'File validation passed. File storage and DB interaction commented out.');
 ?>
