@@ -104,6 +104,7 @@ if (!move_uploaded_file($_FILES['photo']['tmp_name'], $photo_path)) {
 }
 
 // --- Database Interaction ---
+/*
 try {
     $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME, DB_USER, DB_PASS);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -132,4 +133,7 @@ try {
 } catch (Throwable $t) {
     send_json_response(false, 'An unexpected server error occurred: ' . $t->getMessage());
 }
+*/
+// For now, just return success after file upload
+send_json_response(true, 'File uploaded, database interaction commented out.');
 ?>
